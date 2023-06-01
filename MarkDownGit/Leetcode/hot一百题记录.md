@@ -4,7 +4,7 @@
 
 将已经遍历的数据存到hash表中，key数据，value是数组索引
 
-```
+```python
 class Solution:
     def twoSum(self, nums: List[int], target: int) -> List[int]:
         hashtable = dict()
@@ -694,7 +694,7 @@ https://leetcode.cn/problems/coin-change-ii/solution/ling-qian-dui-huan-iihe-pa-
 
 将一个单词转换成另一个单词需要的最少的操作步骤，这道题可以用动态规划来做：$dp[i][j]$表示从word1前i字符，转化到word2前j个字符需要最少的步骤
 $$
-一、当word1[i] != word[j]：dp[i][j] = min(dp[i-1][j],dp[i][j-1],dp[i][j]) \\
+一、当word1[i] != word[j]：dp[i][j] = min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]) \\
 二、当word1[i] == word[j]：dp[i][j] = dp[i][j]
 $$
 $dp[i-1][j]$表示我们可以在word1的第i个位置添加一个和word2第j处相同的字母，那么$dp[i][j]$最小可以为$dp[i-1][j]+1$；这种操作为插入；同理$dp[i][j-1]$对应的是删除，$dp[i-1][j-1]$对应的是替换i，j使得相同
@@ -1742,3 +1742,60 @@ $dp[i][j]$表示以s[i]和s[j]的结尾的最长公共子串，如果s[i]和s[j]
 相等的话$dp[i][j] = dp[i-1][j-1]+1$
 
 这里需要维护一个 最大值res，想知道内容的话，可以记录下i或者j的位置
+
+
+
+### 316.去除重复字母
+
+给你一个字符串 s ，请你去除字符串中重复的字母，使得每个字母只出现一次。需保证 返回结果的字典序最小（要求不能打乱其他字符的相对位置）。
+
+ 
+
+示例 1：
+
+输入：s = "bcabc"
+输出："abc"
+示例 2：
+
+输入：s = "cbacdcbc"
+输出："acdb"
+
+
+
+思路：用单调栈，找到所有s[i] > s[i+1],并去除第i个位置的元素，为了保证每个元素都出现一次，那么必须满足一下两个条件
+
+1. 单调栈中存在的元素直接跳过，不能再次添加到单调栈中
+2. 在弹出栈顶字符时，如果字符串在后面的位置上再也没有这一字符，则不能弹出栈顶字符。为此，需要记录每个字符的剩余数量，当这个值为 0 时，就不能弹出栈顶字符了。
+
+不能回忆出来的话，建议看解析：https://leetcode.cn/problems/remove-duplicate-letters/solution/yi-zhao-chi-bian-li-kou-si-dao-ti-ma-ma-zai-ye-b-4/
+
+```python
+class Solution:
+    def removeDuplicateLetters(self, s: str) -> str:
+        curstackmap = {}
+        lastmap = {}
+        charstack = []
+        for i in s:
+            if i in lastmap:
+                lastmap[i] = lastmap[i] + 1 
+            else:
+                lastmap[i] = 1 
+            curstackmap[i] = 0
+        for i in s:
+            while charstack and curstackmap[i] == 0 and i<charstack[-1] and lastmap[charstack[-1]] > 0:
+                tmp = charstack.pop()
+                curstackmap[tmp] = 0
+            if curstackmap[i] == 0:
+                charstack.append(i)
+                curstackmap[i] = 1
+            lastmap[i] = lastmap[i] - 1 
+        return ''.join(charstack)
+            
+```
+
+#### 相似题：
+
+- [316. 去除重复字母](https://leetcode-cn.com/problems/remove-duplicate-letters/)(困难)
+- [321. 拼接最大数](https://leetcode-cn.com/problems/create-maximum-number/)(困难)
+- [402. 移掉 K 位数字](https://leetcode-cn.com/problems/remove-k-digits/)(中等)
+- [1081. 不同字符的最小子序列](https://leetcode-cn.com/problems/smallest-subsequence-of-distinct-characters/)（中等）
